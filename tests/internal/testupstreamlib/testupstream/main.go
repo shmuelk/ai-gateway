@@ -26,7 +26,8 @@ import (
 
 var logger = log.New(os.Stdout, "[testupstream] ", 0)
 
-// main starts a server that listens on port 1063 and responds with the expected response body and headers
+// main starts a server that listens on the port specified by the environment variable LISTENING_PORT,
+// 8080 by default, and responds with the expected response body and headers
 // set via responseHeadersKey and responseBodyHeaderKey.
 //
 // This also checks if the request content matches the expected headers, path, and body specified in
@@ -35,7 +36,11 @@ var logger = log.New(os.Stdout, "[testupstream] ", 0)
 // This is useful to test the external processor request to the Envoy Gateway LLM Controller.
 func main() {
 	logger.Println("Version: ", version.Version)
-	l, err := net.Listen("tcp", ":8080") // nolint: gosec
+	port := os.Getenv("LISTENING_PORT")
+	if port == "" {
+		port = "8080"
+	}
+	l, err := net.Listen("tcp", fmt.Sprintf(":%s", port)) // nolint: gosec
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
